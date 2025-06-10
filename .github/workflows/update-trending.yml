@@ -1,0 +1,28 @@
+name: Update trending-database.json
+
+on:
+  repository_dispatch:
+    types: [update-trending-database-json]
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Fetch trending JSON
+        run: |
+          curl -sSL "${{ github.event.client_payload.data_url }}" \
+            -o trending-database.json
+
+      - name: Commit & push if updated
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add trending-database.json
+          git commit -m "🔄 Update trending-database.json" || echo "No changes"
+          git push
